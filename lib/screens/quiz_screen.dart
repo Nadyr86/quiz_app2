@@ -1,32 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:quiz_app2/custom_button.dart';
-import 'package:quiz_app2/quiz.brain.dart';
+import 'package:quiz_app2/app_constants/colors/app_colors.dart';
+import 'package:quiz_app2/app_constants/text_styles/app_text_styles.dart';
+import 'package:quiz_app2/data/repo/quiz_repo.dart';
+import 'package:quiz_app2/widgets/custom_button.dart';
+import 'package:quiz_app2/widgets/icon_widget.dart';
 
-class QuizApp extends StatefulWidget {
-  const QuizApp({Key? key}) : super(key: key);
+class QuizScreen extends StatefulWidget {
+  const QuizScreen({Key? key}) : super(key: key);
 
   @override
-  _QuizAppState createState() => _QuizAppState();
+  _QuizScreenState createState() => _QuizScreenState();
 }
 
-class _QuizAppState extends State<QuizApp> {
+class _QuizScreenState extends State<QuizScreen> {
   List<Widget> icons = <Widget>[];
 
-  Widget correctIcon = Padding(
-    padding: const EdgeInsets.only(right: 12.0),
-    child: FaIcon(
-      FontAwesomeIcons.check,
-      color: Color(0xff4CAF4f),
-    ),
+  Widget correctIcon = const IconWidget(
+    icon: FontAwesomeIcons.check,
+    iconColor: AppColors.mainColor,
   );
-  Widget wrongIcon = Padding(
-    padding: const EdgeInsets.only(right: 12.0),
-    child: FaIcon(
-      FontAwesomeIcons.xmark,
-      color: Color(0xffF44336),
-    ),
-  );
+  Widget wrongIcon = const IconWidget(
+      icon: FontAwesomeIcons.xmark, iconColor: AppColors.secondaryColor);
 
   String? suroo = 'Suroo';
   bool isFinished = false;
@@ -38,30 +33,11 @@ class _QuizAppState extends State<QuizApp> {
     algachkySuroonuAlypKel();
   }
 
-  algachkySuroonuAlypKel() {
-    suroo = quizBrain.getQuestion();
-  }
-
-  userAnswered(bool userAnswer) {
-    bool? realAnswer = quizBrain.getAnswer();
-    if (userAnswer == realAnswer) {
-      icons.add(correctIcon);
-    } else {
-      icons.add(wrongIcon);
-    }
-    quizBrain.getNext();
-    suroo = quizBrain.getQuestion();
-    if (suroo == 'ayagyna chykty') {
-      isFinished = true;
-    }
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     final _height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Color(0xff000000),
+      backgroundColor: AppColors.black,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Center(
@@ -74,7 +50,7 @@ class _QuizAppState extends State<QuizApp> {
                 left: 2,
                 child: Text(
                   suroo!,
-                  style: TextStyle(color: Color(0xffFFFFFF), fontSize: 26.0),
+                  style: AppTextStyles.content,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -82,14 +58,9 @@ class _QuizAppState extends State<QuizApp> {
                 Positioned(
                   bottom: _height * 0.09,
                   child: CustomButton(
-                      buttonText: 'kairadan bashta',
-                      onPressed: () {
-                        quizBrain.reset();
-                        suroo = quizBrain.getQuestion();
-                        isFinished = false;
-                        icons = <Widget>[];
-                        setState(() {});
-                      }),
+                    buttonText: 'kairadan bashta',
+                    onPressed: reset,
+                  ),
                 )
               else
                 Positioned(
@@ -98,7 +69,7 @@ class _QuizAppState extends State<QuizApp> {
                     children: [
                       CustomButton(
                         buttonText: 'Tuura',
-                        bgColor: Color(0xff4CAF4F),
+                        bgColor: AppColors.mainColor,
                         onPressed: () {
                           userAnswered(true);
                         },
@@ -108,7 +79,7 @@ class _QuizAppState extends State<QuizApp> {
                       ),
                       CustomButton(
                         buttonText: 'Tuura emes',
-                        bgColor: Color(0xffF44336),
+                        bgColor: AppColors.secondaryColor,
                         onPressed: () {
                           userAnswered(false);
                         },
@@ -133,5 +104,32 @@ class _QuizAppState extends State<QuizApp> {
         ),
       ),
     );
+  }
+
+  algachkySuroonuAlypKel() {
+    suroo = quizRepo.getQuestion();
+  }
+
+  userAnswered(bool userAnswer) {
+    bool? realAnswer = quizRepo.getAnswer();
+    if (userAnswer == realAnswer) {
+      icons.add(correctIcon);
+    } else {
+      icons.add(wrongIcon);
+    }
+    quizRepo.getNext();
+    suroo = quizRepo.getQuestion();
+    if (suroo == 'ayagyna chykty') {
+      isFinished = true;
+    }
+    setState(() {});
+  }
+
+  void reset() {
+    quizRepo.reset();
+    suroo = quizRepo.getQuestion();
+    isFinished = false;
+    icons = <Widget>[];
+    setState(() {});
   }
 }
